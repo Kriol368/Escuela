@@ -27,21 +27,32 @@ public class Escuela {
         if (curentScreen == 0) {
             System.out.println("0 Exit | 1 All Subjects | 2 Login | 3 Register");
         } else if (curentScreen == 1) {
-            System.out.println("0 Exit | 1 My Subjects | 2 Other Subjects | 3 Logout " + userName);
+            System.out.println("0 Exit | 1 My Subjects | 2 Add Subject | 3 Logout " + userName);
         } else {
-            System.out.println("0 Exit | 1 My Subjects | 2 My Salary | Qualify | 3 Logout " + userName);
+            System.out.println("0 Exit | 1 My Subjects | 2 My Salary | 3 Add Subject | 4 Qualify | 5 Logout " + userName);
         }
         System.out.println("----------------------------------------------------------------------------------------------------");
     }
 
     private static void login() throws SQLException {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Do you want to login as a student or as a teacher? (1-Student 2-Teacher)");
+        int opcion = scanner.nextInt();
+        if (opcion == 1){
+            loginStudent();
+        }else if (opcion == 2){
+            loginTeacher();
+        }
+    }
+
+    public static void loginStudent() throws SQLException{
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Username:");
-        String post = scanner.nextLine();
+        String name = scanner.nextLine();
         PreparedStatement st;
-        String query = "SELECT * FROM usuarios WHERE nombre = ?";
+        String query = "SELECT * FROM alumno WHERE nombre = ?";
         st = con.prepareStatement(query);
-        st.setString(1, post);
+        st.setString(1, name);
         ResultSet rs = st.executeQuery();
         if (rs.next()) {
             userID = rs.getInt(1);
@@ -52,28 +63,45 @@ public class Escuela {
         }
     }
 
+    public static void loginTeacher() throws SQLException{
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Username:");
+        String name = scanner.nextLine();
+        PreparedStatement st;
+        String query = "SELECT * FROM profesor WHERE nombre = ?";
+        st = con.prepareStatement(query);
+        st.setString(1, name);
+        ResultSet rs = st.executeQuery();
+        if (rs.next()) {
+            userID = rs.getInt(1);
+            userName = rs.getString(2);
+            curentScreen = 2;
+        } else {
+            System.out.println("User not found");
+        }
+    }
     private static void logout() {
         curentScreen = 0;
     }
 
-    private static void allPosts() throws SQLException {
+    private static void allSubjects() throws SQLException {
         PreparedStatement st;
-        String query = "SELECT p.id, p.texto, p.likes, p.fecha, u.nombre FROM posts p,usuarios u where p.id_usuario = u.id";
+        String query = "SELECT * FROM asignatura";
         st = con.prepareStatement(query);
         ResultSet rs = st.executeQuery();
         while (rs.next()) {
-            System.out.println(rs.getInt(1) + " - " + rs.getString(2) + "\n\t" + "Likes: " + rs.getInt(3) + "\n\t" + "Fecha: " + rs.getTimestamp(4) + "\n\t" + "Usuario: " + rs.getString(5));
+            System.out.println(rs.getInt(1) + " - " + rs.getString(2) + "\n\t" + "Horas: " + rs.getInt(3));
         }
     }
 
     private static void register() throws SQLException {
-        System.out.println("Do you want to registes as a teacher or as a student? (1-Teacher 2-Student)");
+        System.out.println("Do you want to registes as a student or as a teacher? (1-Student 2-Teacher)");
         Scanner scanner = new Scanner(System.in);
         int opcion = scanner.nextInt();
         if (opcion == 1){
             registerStudent();
         }else if (opcion == 2){
-            reisterTeacher();
+            registerTeacher();
         }
     }
 
@@ -89,7 +117,7 @@ public class Escuela {
         st.executeUpdate();
     }
 
-    private static void reisterTeacher() throws SQLException{
+    private static void registerTeacher() throws SQLException{
         Scanner scanner = new Scanner(System.in);
         PreparedStatement st;
         System.out.println("Name:");
@@ -102,14 +130,14 @@ public class Escuela {
         st.setInt(2,salary);
         st.executeUpdate();
     }
-    private static void myPosts() throws SQLException {
+    private static void mySubjects() throws SQLException {
         PreparedStatement st;
-        String query = "SELECT p.id, p.texto, p.likes, p.fecha, u.nombre FROM posts p,usuarios u where p.id_usuario = u.id and p.id_usuario = ?";
+        String query = "SELECT a.id , a.nombre , COALESCE(aa.nota,0) ,a.horas FROM alumno_asignatura aa ,asignatura a WHERE a.id = aa.id_asignatura AND aa.id_alumno  = ?";
         st = con.prepareStatement(query);
         st.setInt(1, userID);
         ResultSet rs = st.executeQuery();
         while (rs.next()) {
-            System.out.println(rs.getInt(1) + " - " + rs.getString(2) + "\n\t" + "Likes: " + rs.getInt(3) + "\n\t" + "Fecha: " + rs.getTimestamp(4) + "\n\t" + "Usuario: " + rs.getString(5));
+            System.out.println(rs.getInt(1) + " - " + rs.getString(2) + "\n\t" + "Nota: " + rs.getInt(3) + "\n\t" + "Horas: " + rs.getInt(4));
         }
     }
 
@@ -124,15 +152,16 @@ public class Escuela {
         }
     }
 
-    private static void newPost() throws SQLException {
+    private static void addSubject() throws SQLException {
+        allSubjects();
         Scanner scanner = new Scanner(System.in);
         PreparedStatement st;
-        System.out.println("Message:");
-        String texto = scanner.nextLine();
-        String query = "INSERT INTO posts (texto,likes,fecha,id_usuario) VALUES (?,0,current_timestamp,?)";
+        System.out.println("Introduce the subject id:");
+        int id_asignatura = scanner.nextInt();
+        String query = "INSERT INTO alumno_asignatura (id_alumno,id_asignatura) VALUES (?,?)";
         st = con.prepareStatement(query);
-        st.setString(1, texto);
-        st.setInt(2, userID);
+        st.setInt(1,userID);
+        st.setInt(2, id_asignatura);
         st.executeUpdate();
     }
 
@@ -178,7 +207,7 @@ public class Escuela {
             if (curentScreen == 0) {
                 switch (option) {
                     case 1:
-                        allPosts();
+                        allSubjects();
                         break;
                     case 2:
                         login();
@@ -187,13 +216,25 @@ public class Escuela {
                         register();
                         break;
                 }
-            } else if (curentScreen == 2) {
+            } else if (curentScreen == 1) {
                 switch (option) {
                     case 1:
-                        myPosts();
+                        mySubjects();
                         break;
                     case 2:
-                        newPost();
+                        addSubject();
+                        break;
+                    case 3:
+                        logout();
+                        break;
+                }
+            } else {
+                switch (option) {
+                    case 1:
+                        mySubjects();
+                        break;
+                    case 2:
+                        addSubject();
                         break;
                     case 3:
                         comment();
@@ -202,24 +243,6 @@ public class Escuela {
                         like();
                         break;
                     case 5:
-                        othersPosts();
-                        break;
-                    case 6:
-                        logout();
-                        break;
-                }
-            } else {
-                switch (option) {
-                    case 1:
-                        myPosts();
-                        break;
-                    case 2:
-                        newPost();
-                        break;
-                    case 3:
-                        comment();
-                        break;
-                    case 4:
                         like();
                         break;
                 }
