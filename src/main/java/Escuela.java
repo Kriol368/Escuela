@@ -13,7 +13,7 @@ public class Escuela {
         int option = -1;
         try {
             option = Integer.parseInt(scanner.next());
-            if (curentScreen == 0 && option > 3 || curentScreen == 1 && option > 3 || curentScreen == 2 && option > 4) {
+            if (curentScreen == 0 && option > 3 || curentScreen == 1 && option > 3 || curentScreen == 2 && option > 5) {
                 System.out.println("Incorrect option");
             }
         } catch (IllegalArgumentException iae) {
@@ -29,7 +29,7 @@ public class Escuela {
         } else if (curentScreen == 1) {
             System.out.println("0 Exit | 1 My Subjects | 2 Add Subject | 3 Logout " + userName);
         } else {
-            System.out.println("0 Exit | 1 My Subjects | 2 My Salary | 3 Add Subject | 4 Qualify | 5 Logout " + userName);
+            System.out.println("0 Exit | 1 My Subjects | 2 Add Subject | 3 My Salary | 4 Qualify | 5 Logout " + userName);
         }
         System.out.println("----------------------------------------------------------------------------------------------------");
     }
@@ -38,14 +38,14 @@ public class Escuela {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Do you want to login as a student or as a teacher? (1-Student 2-Teacher)");
         int opcion = scanner.nextInt();
-        if (opcion == 1){
+        if (opcion == 1) {
             loginStudent();
-        }else if (opcion == 2){
+        } else if (opcion == 2) {
             loginTeacher();
         }
     }
 
-    public static void loginStudent() throws SQLException{
+    public static void loginStudent() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Username:");
         String name = scanner.nextLine();
@@ -63,7 +63,7 @@ public class Escuela {
         }
     }
 
-    public static void loginTeacher() throws SQLException{
+    public static void loginTeacher() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Username:");
         String name = scanner.nextLine();
@@ -80,6 +80,7 @@ public class Escuela {
             System.out.println("User not found");
         }
     }
+
     private static void logout() {
         curentScreen = 0;
     }
@@ -98,15 +99,15 @@ public class Escuela {
         System.out.println("Do you want to registes as a student or as a teacher? (1-Student 2-Teacher)");
         Scanner scanner = new Scanner(System.in);
         int opcion = scanner.nextInt();
-        if (opcion == 1){
+        if (opcion == 1) {
             registerStudent();
-        }else if (opcion == 2){
+        } else if (opcion == 2) {
             registerTeacher();
         }
     }
 
 
-    private static void registerStudent() throws SQLException{
+    private static void registerStudent() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         PreparedStatement st;
         System.out.println("Name:");
@@ -117,7 +118,7 @@ public class Escuela {
         st.executeUpdate();
     }
 
-    private static void registerTeacher() throws SQLException{
+    private static void registerTeacher() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         PreparedStatement st;
         System.out.println("Name:");
@@ -127,72 +128,102 @@ public class Escuela {
         String query = "INSERT INTO profesor (nombre,salario) VALUES (?,?)";
         st = con.prepareStatement(query);
         st.setString(1, name);
-        st.setInt(2,salary);
+        st.setInt(2, salary);
         st.executeUpdate();
     }
-    private static void mySubjects() throws SQLException {
-        PreparedStatement st;
-        String query = "SELECT a.id , a.nombre , COALESCE(aa.nota,0) ,a.horas FROM alumno_asignatura aa ,asignatura a WHERE a.id = aa.id_asignatura AND aa.id_alumno  = ?";
-        st = con.prepareStatement(query);
-        st.setInt(1, userID);
-        ResultSet rs = st.executeQuery();
-        while (rs.next()) {
-            System.out.println(rs.getInt(1) + " - " + rs.getString(2) + "\n\t" + "Nota: " + rs.getInt(3) + "\n\t" + "Horas: " + rs.getInt(4));
-        }
-    }
 
-    private static void othersPosts() throws SQLException {
-        PreparedStatement st;
-        String query = "SELECT p.id, p.texto, p.likes, p.fecha, u.nombre FROM posts p,usuarios u where p.id_usuario = u.id and p.id_usuario != ?";
-        st = con.prepareStatement(query);
-        st.setInt(1, userID);
-        ResultSet rs = st.executeQuery();
-        while (rs.next()) {
-            System.out.println(rs.getInt(1) + " - " + rs.getString(2) + "\n\t" + "Likes: " + rs.getInt(3) + "\n\t" + "Fecha: " + rs.getTimestamp(4) + "\n\t" + "Usuario: " + rs.getString(5));
+    private static void mySubjects() throws SQLException {
+        if (curentScreen == 1) {
+            PreparedStatement st;
+            String query = "SELECT a.id , a.nombre , COALESCE(aa.nota,0) ,a.horas FROM alumno_asignatura aa ,asignatura a WHERE a.id = aa.id_asignatura AND aa.id_alumno  = ?";
+            st = con.prepareStatement(query);
+            st.setInt(1, userID);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                System.out.println(rs.getInt(1) + " - " + rs.getString(2) + "\n\t" + "Nota: " + rs.getInt(3) + "\n\t" + "Horas: " + rs.getInt(4));
+            }
+        } else if (curentScreen == 2) {
+            PreparedStatement st;
+            String query = "SELECT a.id , a.nombre , pa.aula  ,a.horas FROM profesor_asignatura pa ,asignatura a WHERE pa.id_asignatura  = a.id AND pa.id_profesor = ? ";
+            st = con.prepareStatement(query);
+            st.setInt(1, userID);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                System.out.println(rs.getInt(1) + " - " + rs.getString(2) + "\n\t" + "Aula: " + rs.getString(3) + "\n\t" + "Horas: " + rs.getInt(4));
+            }
         }
     }
 
     private static void addSubject() throws SQLException {
         allSubjects();
-        Scanner scanner = new Scanner(System.in);
-        PreparedStatement st;
-        System.out.println("Introduce the subject id:");
-        int id_asignatura = scanner.nextInt();
-        String query = "INSERT INTO alumno_asignatura (id_alumno,id_asignatura) VALUES (?,?)";
-        st = con.prepareStatement(query);
-        st.setInt(1,userID);
-        st.setInt(2, id_asignatura);
-        st.executeUpdate();
+        if (curentScreen == 1) {
+            Scanner scanner = new Scanner(System.in);
+            PreparedStatement st;
+            System.out.println("Introduce the subject id:");
+            int id_asignatura = scanner.nextInt();
+            String query = "INSERT INTO alumno_asignatura (id_alumno,id_asignatura) VALUES (?,?)";
+            st = con.prepareStatement(query);
+            st.setInt(1, userID);
+            st.setInt(2, id_asignatura);
+            st.executeUpdate();
+        } else if (curentScreen == 2) {
+            Scanner scanner = new Scanner(System.in);
+            PreparedStatement st;
+            System.out.println("Introduce the subject id:");
+            int id_asignatura = scanner.nextInt();
+            scanner.nextLine();
+            System.out.println("Introduce the classoom: ");
+            String aula = scanner.nextLine();
+            String query = "INSERT INTO profesor_asignatura (id_profesor,id_asignatura,aula) VALUES (?,?,?)";
+            st = con.prepareStatement(query);
+            st.setInt(1, userID);
+            st.setInt(2, id_asignatura);
+            st.setString(3, aula);
+            st.executeUpdate();
+        }
+
     }
 
-    private static void comment() throws SQLException {
-        Scanner scanner = new Scanner(System.in);
-        int postId;
-        String texto;
-        System.out.println("Select a post to comment:");
-        othersPosts();
-        postId = Integer.parseInt(scanner.nextLine());
+
+    private static void mySalary() throws SQLException {
         PreparedStatement st;
-        System.out.println("Comentario:");
-        texto = scanner.nextLine();
-        String query = "INSERT INTO comentarios (texto,fecha,id_usuario,id_post) VALUES (?,current_timestamp,?,?)";
+        String query = "SELECT p.salario  FROM profesor p WHERE id = ?";
         st = con.prepareStatement(query);
-        st.setString(1, texto);
-        st.setInt(2, userID);
-        st.setInt(3, postId);
-        st.executeUpdate();
+        st.setInt(1, userID);
+        ResultSet rs = st.executeQuery();
+        while (rs.next()) {
+            System.out.println("Salary: " + rs.getInt(1));
+        }
     }
 
-    private static void like() throws SQLException {
-        Scanner scanner = new Scanner(System.in);
-        int postId;
-        System.out.println("Select a post to like:");
-        othersPosts();
-        postId = Integer.parseInt(scanner.nextLine());
+    private static void allStudents() throws SQLException {
         PreparedStatement st;
-        String query = "UPDATE posts SET likes = likes + 1 where id = ?";
+        String query = "SELECT * FROM alumno";
         st = con.prepareStatement(query);
-        st.setInt(1, postId);
+        ResultSet rs = st.executeQuery();
+        while (rs.next()) {
+            System.out.println(rs.getInt(1) + " - " + rs.getString(2));
+        }
+    }
+
+    public static void qualify() throws SQLException {
+        allStudents();
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Introduce the id of the student to qualify: ");
+        int studentId = scanner.nextInt();
+        scanner.nextLine();
+        allSubjects();
+        System.out.println("Select the id of the subject to qualify: ");
+        int subjectId = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("Introduce the qualification: ");
+        int mark = scanner.nextInt();
+        PreparedStatement st;
+        String query = "update alumno_asignatura  set nota = ? WHERE id_alumno = ? and id_asignatura = ?";
+        st = con.prepareStatement(query);
+        st.setInt(1, mark);
+        st.setInt(2, studentId);
+        st.setInt(3, subjectId);
         st.executeUpdate();
     }
 
@@ -237,13 +268,13 @@ public class Escuela {
                         addSubject();
                         break;
                     case 3:
-                        comment();
+                        mySalary();
                         break;
                     case 4:
-                        like();
+                        qualify();
                         break;
                     case 5:
-                        like();
+                        logout();
                         break;
                 }
             }
