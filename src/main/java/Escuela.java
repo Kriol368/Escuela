@@ -1,3 +1,4 @@
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.sql.*;
 
@@ -37,12 +38,19 @@ public class Escuela {
     private static void login() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Do you want to login as a student or as a teacher? (1-Student 2-Teacher)");
-        int opcion = scanner.nextInt();
-        if (opcion == 1) {
-            loginStudent();
-        } else if (opcion == 2) {
-            loginTeacher();
+        try {
+            int opcion = scanner.nextInt();
+            if (opcion == 1) {
+                loginStudent();
+            } else if (opcion == 2) {
+                loginTeacher();
+            } else {
+                System.out.println("Incorrect option");
+            }
+        } catch (InputMismatchException ime) {
+            System.out.println("Incorrect option");
         }
+
     }
 
     public static void loginStudent() throws SQLException {
@@ -97,13 +105,20 @@ public class Escuela {
 
     private static void register() throws SQLException {
         System.out.println("Do you want to registes as a student or as a teacher? (1-Student 2-Teacher)");
-        Scanner scanner = new Scanner(System.in);
-        int opcion = scanner.nextInt();
-        if (opcion == 1) {
-            registerStudent();
-        } else if (opcion == 2) {
-            registerTeacher();
+        try {
+            Scanner scanner = new Scanner(System.in);
+            int opcion = scanner.nextInt();
+            if (opcion == 1) {
+                registerStudent();
+            } else if (opcion == 2) {
+                registerTeacher();
+            } else {
+                System.out.println("Incorrect option");
+            }
+        } catch (InputMismatchException ime) {
+            System.out.println("Incorrect option");
         }
+
     }
 
 
@@ -157,29 +172,38 @@ public class Escuela {
     private static void addSubject() throws SQLException {
         allSubjects();
         if (curentScreen == 1) {
-            Scanner scanner = new Scanner(System.in);
-            PreparedStatement st;
-            System.out.println("Introduce the subject id:");
-            int id_asignatura = scanner.nextInt();
-            String query = "INSERT INTO alumno_asignatura (id_alumno,id_asignatura) VALUES (?,?)";
-            st = con.prepareStatement(query);
-            st.setInt(1, userID);
-            st.setInt(2, id_asignatura);
-            st.executeUpdate();
+            try {
+                Scanner scanner = new Scanner(System.in);
+                PreparedStatement st;
+                System.out.println("Introduce the subject id:");
+                int id_asignatura = scanner.nextInt();
+                String query = "INSERT INTO alumno_asignatura (id_alumno,id_asignatura) VALUES (?,?)";
+                st = con.prepareStatement(query);
+                st.setInt(1, userID);
+                st.setInt(2, id_asignatura);
+                st.executeUpdate();
+            }catch (InputMismatchException ime) {
+                System.out.println("Incorrect option");
+            }
         } else if (curentScreen == 2) {
-            Scanner scanner = new Scanner(System.in);
-            PreparedStatement st;
-            System.out.println("Introduce the subject id:");
-            int id_asignatura = scanner.nextInt();
-            scanner.nextLine();
-            System.out.println("Introduce the classoom: ");
-            String aula = scanner.nextLine();
-            String query = "INSERT INTO profesor_asignatura (id_profesor,id_asignatura,aula) VALUES (?,?,?)";
-            st = con.prepareStatement(query);
-            st.setInt(1, userID);
-            st.setInt(2, id_asignatura);
-            st.setString(3, aula);
-            st.executeUpdate();
+            try {
+                Scanner scanner = new Scanner(System.in);
+                PreparedStatement st;
+                System.out.println("Introduce the subject id:");
+                int id_asignatura = scanner.nextInt();
+                scanner.nextLine();
+                System.out.println("Introduce the classoom: ");
+                String aula = scanner.nextLine();
+                String query = "INSERT INTO profesor_asignatura (id_profesor,id_asignatura,aula) VALUES (?,?,?)";
+                st = con.prepareStatement(query);
+                st.setInt(1, userID);
+                st.setInt(2, id_asignatura);
+                st.setString(3, aula);
+                st.executeUpdate();
+            }catch (InputMismatchException ime) {
+                System.out.println("Incorrect option");
+            }
+
         }
 
     }
@@ -207,24 +231,32 @@ public class Escuela {
     }
 
     public static void qualify() throws SQLException {
-        allStudents();
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Introduce the id of the student to qualify: ");
-        int studentId = scanner.nextInt();
-        scanner.nextLine();
-        allSubjects();
-        System.out.println("Select the id of the subject to qualify: ");
-        int subjectId = scanner.nextInt();
-        scanner.nextLine();
-        System.out.println("Introduce the qualification: ");
-        int mark = scanner.nextInt();
-        PreparedStatement st;
-        String query = "update alumno_asignatura  set nota = ? WHERE id_alumno = ? and id_asignatura = ?";
-        st = con.prepareStatement(query);
-        st.setInt(1, mark);
-        st.setInt(2, studentId);
-        st.setInt(3, subjectId);
-        st.executeUpdate();
+        try {
+            allStudents();
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Introduce the id of the student to qualify: ");
+            int studentId = scanner.nextInt();
+            scanner.nextLine();
+            allSubjects();
+            System.out.println("Select the id of the subject to qualify: ");
+            int subjectId = scanner.nextInt();
+            scanner.nextLine();
+            System.out.println("Introduce the qualification: ");
+            int mark = scanner.nextInt();
+            if (mark < 0 || mark > 10){
+                System.out.println("Mark must be between 0 and 10");
+            }else {
+                PreparedStatement st;
+                String query = "update alumno_asignatura  set nota = ? WHERE id_alumno = ? and id_asignatura = ?";
+                st = con.prepareStatement(query);
+                st.setInt(1, mark);
+                st.setInt(2, studentId);
+                st.setInt(3, subjectId);
+                st.executeUpdate();
+            }
+        }catch (InputMismatchException ime) {
+            System.out.println("Incorrect option");
+        }
     }
 
     public static void main(String[] args) throws SQLException {
