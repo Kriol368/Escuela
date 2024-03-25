@@ -231,6 +231,14 @@ public class Escuela {
         int option;
         String host = "jdbc:sqlite:src/main/resources/escuela.sqlite";
         con = java.sql.DriverManager.getConnection(host);
+        System.out.println("""
+                ___________                           .__          \s
+                \\_   _____/ ______ ____  __ __   ____ |  | _____   \s
+                 |    __)_ /  ___// ___\\|  |  \\_/ __ \\|  | \\__  \\  \s
+                 |        \\\\___ \\\\  \\___|  |  /\\  ___/|  |__/ __ \\_\s
+                /_______  /____  >\\___  >____/  \\___  >____(____  /\s
+                        \\/     \\/     \\/            \\/          \\/
+                """);
         while (true) {
             printMenu();
             option = getOption();
