@@ -121,7 +121,6 @@ public class Escuela {
 
     }
 
-
     private static void registerStudent() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         PreparedStatement st;
@@ -182,7 +181,7 @@ public class Escuela {
                 st.setInt(1, userID);
                 st.setInt(2, id_asignatura);
                 st.executeUpdate();
-            }catch (InputMismatchException ime) {
+            } catch (InputMismatchException ime) {
                 System.out.println("Incorrect option");
             }
         } else if (curentScreen == 2) {
@@ -200,14 +199,13 @@ public class Escuela {
                 st.setInt(2, id_asignatura);
                 st.setString(3, aula);
                 st.executeUpdate();
-            }catch (InputMismatchException ime) {
+            } catch (InputMismatchException ime) {
                 System.out.println("Incorrect option");
             }
 
         }
 
     }
-
 
     private static void mySalary() throws SQLException {
         PreparedStatement st;
@@ -243,9 +241,9 @@ public class Escuela {
             scanner.nextLine();
             System.out.println("Introduce the qualification: ");
             int mark = scanner.nextInt();
-            if (mark < 0 || mark > 10){
+            if (mark < 0 || mark > 10) {
                 System.out.println("Mark must be between 0 and 10");
-            }else {
+            } else {
                 PreparedStatement st;
                 String query = "update alumno_asignatura  set nota = ? WHERE id_alumno = ? and id_asignatura = ?";
                 st = con.prepareStatement(query);
@@ -254,7 +252,7 @@ public class Escuela {
                 st.setInt(3, subjectId);
                 st.executeUpdate();
             }
-        }catch (InputMismatchException ime) {
+        } catch (InputMismatchException ime) {
             System.out.println("Incorrect option");
         }
     }
